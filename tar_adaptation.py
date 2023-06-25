@@ -331,6 +331,7 @@ def train_target(args):
             -1, args.K, -1
         )  # batch x K x C
 
+        # =================== loss ===================
         loss = torch.mean(
             (F.kl_div(softmax_out_un, score_near, reduction="none").sum(-1)).sum(1)
         ) # Equal to dot product

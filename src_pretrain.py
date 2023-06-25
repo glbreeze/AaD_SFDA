@@ -297,9 +297,9 @@ if __name__ == "__main__":
     random.seed(SEED)
     # torch.backends.cudnn.deterministic = True
 
-    folder = './data/'
-    args.s_dset_path = folder + args.dset + '/' + names[args.s] + '_list.txt'
-    args.test_dset_path = folder + args.dset + '/' + names[args.t] + '_list.txt'
+    folder = '../dataset/'
+    args.s_dset_path = folder + args.dset + '/' + names[args.s] + '/image_list.txt'
+    args.test_dset_path = folder + args.dset + '/' + names[args.t] + '/image_list.txt'
 
 
     args.output_dir_src = osp.join(args.output, args.da, args.dset, names[args.s][0].upper())
