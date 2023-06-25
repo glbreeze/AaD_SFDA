@@ -154,8 +154,8 @@ def cal_acc(loader, fea_bank, socre_bank, netF, netB, netC, args, flag=False):
 
             outputs = netC(fea)
             softmax_out = nn.Softmax()(outputs)
-            nu.append(torch.mean(torch.svd(softmax_out)[1]))
-            output_f_norm = F.normalize(fea)
+            # nu.append(torch.mean(torch.svd(softmax_out)[1]))
+            # output_f_norm = F.normalize(fea)
             # fea_bank[indx] = output_f_norm.detach().clone().cpu()
             label_bank[indx] = labels.float().detach().clone()  # .cpu()
             pred_bank[indx] = outputs.max(-1)[1].float().detach().clone().cpu()
@@ -169,9 +169,7 @@ def cal_acc(loader, fea_bank, socre_bank, netF, netB, netC, args, flag=False):
                 all_label = torch.cat((all_label, labels.float()), 0)
                 # all_fea = torch.cat((all_fea, output_f_norm.cpu()), 0)
     _, predict = torch.max(all_output, 1)
-    accuracy = torch.sum(torch.squeeze(predict).float() == all_label).item() / float(
-        all_label.size()[0]
-    )
+    accuracy = torch.sum(torch.squeeze(predict).float() == all_label).item() / float(all_label.size()[0])
 
     _, socre_bank_ = torch.max(socre_bank, 1)
     distance = fea_bank.cpu() @ fea_bank.cpu().T
@@ -215,15 +213,12 @@ def train_target(args):
     dset_loaders = data_load(args)
     ## set base network
     netF = network.ResBase(res_name=args.net).cuda()
-
     netB = network.feat_bootleneck(
         type=args.classifier,
         feature_dim=netF.in_features,
         bottleneck_dim=args.bottleneck,
     ).cuda()
-    netC = network.feat_classifier(
-        type=args.layer, class_num=args.class_num, bottleneck_dim=args.bottleneck
-    ).cuda()
+    netC = network.feat_classifier(type=args.layer, class_num=args.class_num, bottleneck_dim=args.bottleneck).cuda()
 
     modelpath = args.output_dir_src + "/source_F.pt"
     netF.load_state_dict(torch.load(modelpath))
@@ -235,7 +230,6 @@ def train_target(args):
     param_group = []
     param_group_c = []
     for k, v in netF.named_parameters():
-        # if k.find('bn')!=-1:
         if True:
             param_group += [{"params": v, "lr": args.lr * 0.1}]  # 0.1
 
@@ -260,15 +254,19 @@ def train_target(args):
     netF.eval()
     netB.eval()
     netC.eval()
+    max_iter = args.max_epoch * len(dset_loaders["target"])
+    interval_iter = max_iter // args.interval
+
+    # ========== use source model for fea_bank & score_bank ==========
+
     with torch.no_grad():
         iter_test = iter(loader)
         for i in range(len(loader)):
             data = iter_test.next()
-            inputs = data[0]
-            indx = data[-1]
-            # labels = data[1]
+            inputs, indx = data[0], data[-1]
             inputs = inputs.cuda()
             output = netB(netF(inputs))
+
             output_norm = F.normalize(output)
             outputs = netC(output)
             outputs = nn.Softmax(-1)(outputs)
@@ -276,28 +274,24 @@ def train_target(args):
             fea_bank[indx] = output_norm.detach().clone().cpu()
             score_bank[indx] = outputs.detach().clone()  # .cpu()
 
-    max_iter = args.max_epoch * len(dset_loaders["target"])
-    interval_iter = max_iter // args.interval
+    # ========== start training ==========
     iter_num = 0
-
     netF.train()
     netB.train()
     netC.train()
     acc_log = 0
 
     real_max_iter = max_iter
-
     while iter_num < real_max_iter:
         try:
-            inputs_test, _, tar_idx = iter_test.next()
+            inputs_test, _, tar_idx = next(iter_test)
         except:
             iter_test = iter(dset_loaders["target"])
-            inputs_test, _, tar_idx = iter_test.next()
+            inputs_test, _, tar_idx = next(iter_test)
 
         if inputs_test.size(0) == 1:
             continue
 
-        inputs_test = inputs_test.cuda()
         if True:
             alpha = (1 + 10 * iter_num / max_iter) ** (-args.beta) * args.alpha
         else:
@@ -307,16 +301,16 @@ def train_target(args):
         lr_scheduler(optimizer, iter_num=iter_num, max_iter=max_iter)
         lr_scheduler(optimizer_c, iter_num=iter_num, max_iter=max_iter)
 
+        inputs_test = inputs_test.cuda()
         features_test = netB(netF(inputs_test))
         outputs_test = netC(features_test)
         softmax_out = nn.Softmax(dim=1)(outputs_test)
         # output_re = softmax_out.unsqueeze(1)
 
+        # ========== update fea & score bank ==========
         with torch.no_grad():
             output_f_norm = F.normalize(features_test)
             output_f_ = output_f_norm.cpu().detach().clone()
-
-            pred_bs = softmax_out
 
             fea_bank[tar_idx] = output_f_.detach().clone().cpu()
             score_bank[tar_idx] = softmax_out.detach().clone()
@@ -327,27 +321,24 @@ def train_target(args):
             score_near = score_bank[idx_near]  # batch x K x C
 
         # nn
-        softmax_out_un = softmax_out.unsqueeze(1).expand(
-            -1, args.K, -1
-        )  # batch x K x C
+        softmax_out_un = softmax_out.unsqueeze(1).expand(-1, args.K, -1)  # batch x K x C
 
         # =================== loss ===================
         loss = torch.mean(
             (F.kl_div(softmax_out_un, score_near, reduction="none").sum(-1)).sum(1)
-        ) # Equal to dot product
+        )  # Equal to dot product
 
         mask = torch.ones((inputs_test.shape[0], inputs_test.shape[0]))
         diag_num = torch.diag(mask)
         mask_diag = torch.diag_embed(diag_num)
-        mask = mask - mask_diag
-        copy = softmax_out.T  # .detach().clone()#
+        mask = mask - mask_diag  # square matrix with only diagonal matrix = 0
 
+        copy = softmax_out.T  # .detach().clone()# [c, batch]
         dot_neg = softmax_out @ copy  # batch x batch
-
         dot_neg = (dot_neg * mask.cuda()).sum(-1)  # batch
         neg_pred = torch.mean(dot_neg)
-        loss += neg_pred * alpha
 
+        loss += neg_pred * alpha
         optimizer.zero_grad()
         optimizer_c.zero_grad()
         loss.backward()
@@ -359,20 +350,10 @@ def train_target(args):
             netB.eval()
             netC.eval()
             if args.dset == "visda-2017":
-                acc, accc = cal_acc(
-                    dset_loaders["test"],
-                    fea_bank,
-                    score_bank,
-                    netF,
-                    netB,
-                    netC,
-                    args,
-                    flag=True,
-                )
+                acc, accc = cal_acc(dset_loaders["test"], fea_bank, score_bank, netF, netB, netC, args, flag=True)
+
                 log_str = (
-                    "Task: {}, Iter:{}/{};  Acc on target: {:.2f}".format(
-                        args.name, iter_num, max_iter, acc
-                    )
+                    "Task: {}, Iter:{}/{};  Acc on target: {:.2f}".format(args.name, iter_num, max_iter, acc)
                     + "\n"
                     + "T: "
                     + accc
@@ -381,6 +362,7 @@ def train_target(args):
             args.out_file.write(log_str + "\n")
             args.out_file.flush()
             print(log_str + "\n")
+
             netF.train()
             netB.train()
             netC.train()
@@ -432,7 +414,6 @@ if __name__ == "__main__":
     parser.add_argument("--output", type=str, default="weight/target/")
     parser.add_argument("--output_src", type=str, default="weight/source/")
     parser.add_argument("--tag", type=str, default="LPA")
-    parser.add_argument("--da", type=str, default="uda")
     parser.add_argument("--issave", type=bool, default=True)
     parser.add_argument("--cc", default=False, action="store_true")
     parser.add_argument("--alpha", type=float, default=1.0)
@@ -462,17 +443,15 @@ if __name__ == "__main__":
             continue
         args.t = i
 
-        folder = "./data/"
-        args.s_dset_path = folder + args.dset + "/" + names[args.s] + "_list.txt"
-        args.t_dset_path = folder + args.dset + "/" + names[args.t] + "_list.txt"
-        args.test_dset_path = folder + args.dset + "/" + names[args.t] + "_list.txt"
+        folder = '../dataset/'
+        args.s_dset_path = folder + args.dset + '/' + names[args.s] + '/image_list.txt'
+        args.t_dset_path = folder + args.dset + '/' + names[args.t] + '/image_list.txt'
+        args.test_dset_path = folder + args.dset + '/' + names[args.t] + '/image_list.txt'
 
-        args.output_dir_src = osp.join(
-            args.output_src, args.da, args.dset, names[args.s][0].upper()
-        )
+        args.output_dir_src = osp.join(args.output_src, args.dset, names[args.s][0].upper())
+
         args.output_dir = osp.join(
             args.output,
-            args.da,
             args.dset,
             names[args.s][0].upper() + names[args.t][0].upper(),
         )
