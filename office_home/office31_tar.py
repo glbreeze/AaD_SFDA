@@ -44,10 +44,11 @@ def lr_scheduler(optimizer, iter_num, max_iter, gamma=10, power=0.75):
 
 class ImageList_idx(Dataset):
     def __init__(
-        self, image_list, labels=None, transform=None, target_transform=None, mode="RGB"
+        self, image_list, labels=None, transform=None, target_transform=None, mode="RGB", root='/scratch/lg154/sseg/dataset'
     ):
         imgs = make_dataset(image_list, labels)
 
+        self.root = root
         self.imgs = imgs
         self.transform = transform
         self.target_transform = target_transform
@@ -59,7 +60,7 @@ class ImageList_idx(Dataset):
     def __getitem__(self, index):
         path, target = self.imgs[index]
         # for visda
-        img = self.loader(path)
+        img = self.loader(os.path.join(self.root, path))
         if self.transform is not None:
             img = self.transform(img)
         if self.target_transform is not None:

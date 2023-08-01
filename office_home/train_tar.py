@@ -10,12 +10,12 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torchvision import transforms
-import network
+from . import network
 from torch.utils.data import DataLoader
 import random, pdb, math, copy
 from tqdm import tqdm
 import pickle
-from utils import *
+from .utils import *
 from torch import autograd
 
 
@@ -52,7 +52,7 @@ def lr_scheduler(optimizer, iter_num, max_iter, gamma=10, power=1):
 
 class ImageList_idx(Dataset):
     def __init__(
-        self, image_list, labels=None, transform=None, target_transform=None, mode="RGB"
+        self, image_list, labels=None, transform=None, target_transform=None, mode="RGB",  root='/scratch/lg154/sseg/dataset'
     ):
         imgs = make_dataset(image_list, labels)
 
@@ -67,7 +67,7 @@ class ImageList_idx(Dataset):
     def __getitem__(self, index):
         path, target = self.imgs[index]
         # for visda
-        img = self.loader(path)
+        img = self.loader(os.path.join(self.root, path))
         if self.transform is not None:
             img = self.transform(img)
         if self.target_transform is not None:
@@ -165,7 +165,8 @@ def hyper_decay(x, beta=-5, alpha=1):
 
 def train_target_decay(args):
     dset_loaders = office_load_idx(args)
-    ## set base network
+
+    # =================== set base network ===================
 
     netF = network.ResNet_FE().cuda()
     oldC = network.feat_classifier(
@@ -190,6 +191,7 @@ def train_target_decay(args):
     )
     optimizer = op_copy(optimizer)
 
+    # =================== core and feat bank ===================
     acc_init = 0
     start = True
     loader = dset_loaders["target"]
@@ -226,6 +228,7 @@ def train_target_decay(args):
     interval_iter = max_iter // args.interval
     iter_num = 0
 
+    # =================== model fine-tune ===================
     netF.train()
     oldC.train()
 

@@ -12,22 +12,9 @@ from torch.utils.data import DataLoader
 import random, pdb, math, copy
 from tqdm import tqdm
 import pickle
-from utils import *
+from office_home.utils import *
 from torch import autograd
 import shutil
-
-import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
-from mpl_toolkits.mplot3d import Axes3D
-from mpl_toolkits.mplot3d import proj3d
-from sklearn.manifold import TSNE
-import pickle as pkl
-import matplotlib.cm as cm
-import collections
-import matplotlib.pyplot as plt
-from matplotlib.ticker import NullFormatter
-from sklearn import manifold, datasets
-from mpl_toolkits.mplot3d import Axes3D
 
 
 def print_args(args):
@@ -56,6 +43,8 @@ def train_source(args):
         weight_decay=5e-4,
         nesterov=True,
     )
+
+    smax = 100
 
     acc_init = 0
     for epoch in range(args.max_epoch):
@@ -119,9 +108,7 @@ def test_target(args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Domain Adaptation on office-home dataset"
-    )
+    parser = argparse.ArgumentParser(description="Domain Adaptation on office dataset")
     parser.add_argument(
         "--gpu_id", type=str, nargs="?", default="0", help="device id to run"
     )
@@ -131,16 +118,20 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=64, help="batch_size")
     parser.add_argument("--worker", type=int, default=4, help="number of workers")
     parser.add_argument("--dset", type=str, default="a2c")
+    parser.add_argument("--choice", type=str, default="shot")
     parser.add_argument("--lr", type=float, default=0.001, help="learning rate")
     parser.add_argument("--seed", type=int, default=2021, help="random seed")
-    parser.add_argument("--class_num", type=int, default=65)
+    parser.add_argument("--class_num", type=int, default=31)
     parser.add_argument("--par", type=float, default=0.1)
     parser.add_argument("--bottleneck", type=int, default=256)
     parser.add_argument("--layer", type=str, default="wn", choices=["linear", "wn"])
     parser.add_argument("--classifier", type=str, default="bn", choices=["ori", "bn"])
     parser.add_argument("--smooth", type=float, default=0.1)
-    parser.add_argument("--output", type=str, default="weight")
-    parser.add_argument("--home", action="store_true")
+    parser.add_argument("--output", type=str, default="office31_weight")
+    # parser.add_argument("--home", action="store_true")
+    parser.add_argument("--office31", action="store_true", default=True)
+    parser.add_argument("--visda", action="store_true")
+    parser.add_argument("--use_c", action="store_true", default=True)
     args = parser.parse_args()
     # args.class_num = 31
 
@@ -160,8 +151,8 @@ if __name__ == "__main__":
     if not osp.exists(args.output_dir):
         os.mkdir(args.output_dir)
 
-    if args.home:
-        task = ["c", "a", "p", "r"]
+    if args.office31:
+        task = ["a", "d", "w"]
     task_s = args.dset.split("2")[0]
     task.remove(task_s)
     task_all = [task_s + "2" + i for i in task]

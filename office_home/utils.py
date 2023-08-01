@@ -1,4 +1,4 @@
-import torch
+import torch, os
 import torch.nn as nn
 import numpy as np
 from scipy.spatial.distance import cdist
@@ -206,10 +206,11 @@ def l_loader(path):
 
 class ImageList(Dataset):
     def __init__(
-        self, image_list, labels=None, transform=None, target_transform=None, mode="RGB"
+        self, image_list, labels=None, transform=None, target_transform=None, mode="RGB",  root='/scratch/lg154/sseg/dataset'
     ):
         imgs = make_dataset(image_list, labels)
 
+        self.root = root
         self.imgs = imgs
         self.transform = transform
         self.target_transform = target_transform
@@ -221,7 +222,7 @@ class ImageList(Dataset):
     def __getitem__(self, index):
         path, target = self.imgs[index]
         # for visda
-        img = self.loader(path)
+        img = self.loader(os.path.join(self.root, path))
         if self.transform is not None:
             img = self.transform(img)
         if self.target_transform is not None:
@@ -272,10 +273,10 @@ def office_load(args):
         prep_dict["source"] = image_train()
         prep_dict["target"] = image_target()
         prep_dict["test"] = image_test()
-        train_source = ImageList(s_tr, transform=prep_dict["source"])
-        test_source = ImageList(s_tr, transform=prep_dict["source"])
-        train_target = ImageList(open(t_tr).readlines(), transform=prep_dict["target"])
-        test_target = ImageList(open(t_ts).readlines(), transform=prep_dict["test"])
+        train_source = ImageList(s_tr, transform=prep_dict["source"], root='/scratch/lg154/sseg/dataset')
+        test_source = ImageList(s_tr, transform=prep_dict["source"],  root='/scratch/lg154/sseg/dataset')
+        train_target = ImageList(open(t_tr).readlines(), transform=prep_dict["target"],  root='/scratch/lg154/sseg/dataset')
+        test_target = ImageList(open(t_ts).readlines(), transform=prep_dict["test"],  root='/scratch/lg154/sseg/dataset')
     if args.home == True:
         ss = args.dset.split("2")[0]
         tt = args.dset.split("2")[1]
@@ -312,10 +313,10 @@ def office_load(args):
         prep_dict["source"] = image_train()
         prep_dict["target"] = image_target()
         prep_dict["test"] = image_test()
-        train_source = ImageList(s_tr, transform=prep_dict["source"])
-        test_source = ImageList(s_ts, transform=prep_dict["source"])
-        train_target = ImageList(open(t_tr).readlines(), transform=prep_dict["target"])
-        test_target = ImageList(open(t_ts).readlines(), transform=prep_dict["test"])
+        train_source = ImageList(s_tr, transform=prep_dict["source"],  root='/scratch/lg154/sseg/dataset')
+        test_source = ImageList(s_ts, transform=prep_dict["source"],  root='/scratch/lg154/sseg/dataset')
+        train_target = ImageList(open(t_tr).readlines(), transform=prep_dict["target"],  root='/scratch/lg154/sseg/dataset')
+        test_target = ImageList(open(t_ts).readlines(), transform=prep_dict["test"], root='/scratch/lg154/sseg/dataset')
 
     dset_loaders = {}
     dset_loaders["source_tr"] = DataLoader(
