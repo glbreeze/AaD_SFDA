@@ -1,0 +1,8 @@
+result
+.idea/**
+*.log
+*.pyc
+*.out
+weight
+*.txt
+

@@ -411,7 +411,7 @@ if __name__ == "__main__":
     parser.add_argument("--classifier", type=str, default="bn", choices=["ori", "bn"])
     parser.add_argument("--smooth", type=float, default=0.1)
     parser.add_argument("--beta", type=float, default=0.75)
-    parser.add_argument("--output", type=str, default="hat_1")  # trainingC_2
+    parser.add_argument("--output", type=str, default="office31_weight")  # trainingC_2
     parser.add_argument("--file", type=str, default="k23")
     parser.add_argument("--idl", action="store_true")
     parser.add_argument("--home", action="store_true")
