@@ -1,7 +1,6 @@
 import argparse
 import os, sys
 import os.path as osp
-import torchvision
 import numpy as np
 import torch
 import torch.nn as nn
@@ -12,7 +11,7 @@ from torch.utils.data import DataLoader
 import random, pdb, math, copy
 from tqdm import tqdm
 import pickle
-from office_home.utils import *
+from utils import *
 from torch import autograd
 import shutil
 
@@ -141,8 +140,10 @@ if __name__ == "__main__":
     parser.add_argument("--smooth", type=float, default=0.1)
     parser.add_argument("--output", type=str, default="weight")
     parser.add_argument("--home", action="store_true")
+    parser.add_argument("--office31", action="store_true", default=False)
     args = parser.parse_args()
     # args.class_num = 31
+    args.office31 = False
 
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id
     SEED = args.seed

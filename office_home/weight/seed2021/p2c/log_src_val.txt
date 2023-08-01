@@ -1,0 +1,40 @@
+==========================================
+gpu_id:0
+s:0
+t:1
+max_epoch:20
+batch_size:64
+worker:4
+dset:p2c
+lr:0.001
+seed:2021
+class_num:65
+par:0.1
+bottleneck:256
+layer:wn
+classifier:bn
+smooth:0.1
+output:weight
+home:True
+office31:False
+output_dir:./weight/seed2021/p2c
+out_file:<_io.TextIOWrapper name='./weight/seed2021/p2c/log_src_val.txt' mode='w' encoding='UTF-8'>
+
+Task: p2c, Iter:1/20; Accuracy = 93.92%
+Task: p2c, Iter:2/20; Accuracy = 98.04%
+Task: p2c, Iter:3/20; Accuracy = 99.19%
+Task: p2c, Iter:4/20; Accuracy = 99.39%
+Task: p2c, Iter:5/20; Accuracy = 99.55%
+Task: p2c, Iter:6/20; Accuracy = 99.59%
+Task: p2c, Iter:7/20; Accuracy = 99.64%
+Task: p2c, Iter:8/20; Accuracy = 99.71%
+Task: p2c, Iter:9/20; Accuracy = 99.75%
+Task: p2c, Iter:10/20; Accuracy = 99.77%
+Task: p2c, Iter:11/20; Accuracy = 99.77%
+Task: p2c, Iter:12/20; Accuracy = 99.62%
+Task: p2c, Iter:13/20; Accuracy = 99.75%
+Task: p2c, Iter:14/20; Accuracy = 99.73%
+Task: p2c, Iter:15/20; Accuracy = 99.80%
+Task: p2c, Iter:16/20; Accuracy = 99.77%
+Task: p2c, Iter:17/20; Accuracy = 99.77%
+Task: p2c, Iter:18/20; Accuracy = 99.71%

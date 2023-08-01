@@ -1,0 +1,24 @@
+==========================================
+gpu_id:0
+s:0
+t:1
+max_epoch:20
+batch_size:64
+worker:4
+dset:a2w
+choice:shot
+lr:0.001
+seed:2021
+class_num:31
+par:0.1
+bottleneck:256
+layer:wn
+classifier:bn
+smooth:0.1
+output:office31_weight
+office31:True
+visda:False
+use_c:True
+output_dir:./office31_weight/seed2021/a2w
+out_file:<_io.TextIOWrapper name='./office31_weight/seed2021/a2w/log_src_val.txt' mode='w' encoding='UTF-8'>
+

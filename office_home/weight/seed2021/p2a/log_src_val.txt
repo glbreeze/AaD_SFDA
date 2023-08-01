@@ -1,0 +1,21 @@
+==========================================
+gpu_id:0
+s:0
+t:1
+max_epoch:20
+batch_size:64
+worker:4
+dset:p2a
+lr:0.001
+seed:2021
+class_num:65
+par:0.1
+bottleneck:256
+layer:wn
+classifier:bn
+smooth:0.1
+output:weight
+home:True
+output_dir:./weight/seed2021/p2a
+out_file:<_io.TextIOWrapper name='./weight/seed2021/p2a/log_src_val.txt' mode='w' encoding='UTF-8'>
+

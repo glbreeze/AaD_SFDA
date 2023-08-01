@@ -62,13 +62,14 @@ class ImageList(Dataset):
         return len(self.imgs)
 
 class ImageList_idx(Dataset):
-    def __init__(self, image_list, labels=None, transform=None, target_transform=None, mode='RGB'):
+    def __init__(self, image_list, labels=None, transform=None, target_transform=None, mode='RGB', root=None):
         imgs = make_dataset(image_list, labels)
         if len(imgs) == 0:
             raise(RuntimeError("Found 0 images in subfolders of: " + root + "\n"
                                "Supported image extensions are: " + ",".join(IMG_EXTENSIONS)))
 
         self.imgs = imgs
+        self.root = root
         self.transform = transform
         self.target_transform = target_transform
         if mode == 'RGB':
@@ -78,7 +79,7 @@ class ImageList_idx(Dataset):
 
     def __getitem__(self, index):
         path, target = self.imgs[index]
-        img = self.loader(path)
+        img = self.loader(os.path.join(self.root, path))
         if self.transform is not None:
             img = self.transform(img)
         if self.target_transform is not None:

@@ -89,7 +89,7 @@ def data_load(args):
     _, te_txt = torch.utils.data.random_split(txt_src, [tr_size, dsize - tr_size])
     tr_txt = txt_src
 
-    dsets["source_tr"] = ImageList(tr_txt, transform=image_train())
+    dsets["source_tr"] = ImageList(tr_txt, transform=image_train(), root=os.path.dirname(args.s_dset_path))
     dset_loaders["source_tr"] = DataLoader(
         dsets["source_tr"],
         batch_size=train_bs,
@@ -97,7 +97,7 @@ def data_load(args):
         num_workers=args.worker,
         drop_last=False,
     )
-    dsets["source_te"] = ImageList(te_txt, transform=image_test())
+    dsets["source_te"] = ImageList(te_txt, transform=image_test(), root=os.path.dirname(args.s_dset_path))
     dset_loaders["source_te"] = DataLoader(
         dsets["source_te"],
         batch_size=train_bs,
@@ -105,7 +105,7 @@ def data_load(args):
         num_workers=args.worker,
         drop_last=False,
     )
-    dsets["target"] = ImageList_idx(txt_tar, transform=image_train())
+    dsets["target"] = ImageList_idx(txt_tar, transform=image_train(), root=os.path.dirname(args.t_dset_path))
     dset_loaders["target"] = DataLoader(
         dsets["target"],
         batch_size=train_bs,
@@ -113,7 +113,7 @@ def data_load(args):
         num_workers=args.worker,
         drop_last=False,
     )
-    dsets["test"] = ImageList_idx(txt_test, transform=image_test())
+    dsets["test"] = ImageList_idx(txt_test, transform=image_test(), root=os.path.dirname(args.test_dset_path))
     dset_loaders["test"] = DataLoader(
         dsets["test"],
         batch_size=train_bs * 3,
@@ -421,6 +421,9 @@ if __name__ == "__main__":
     parser.add_argument("--alpha_decay", default=True)
     parser.add_argument("--nuclear", default=False, action="store_true")
     parser.add_argument("--var", default=False, action="store_true")
+    
+    parser.add_argument("--exp_name", type=str, default="")
+    
     args = parser.parse_args()
 
     if args.dset == "office-home":
@@ -453,6 +456,7 @@ if __name__ == "__main__":
         args.output_dir = osp.join(
             args.output,
             args.dset,
+            args.exp_name,
             names[args.s][0].upper() + names[args.t][0].upper(),
         )
         args.name = names[args.s][0].upper() + names[args.t][0].upper()

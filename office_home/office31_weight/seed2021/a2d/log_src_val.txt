@@ -1,0 +1,46 @@
+==========================================
+gpu_id:0
+s:0
+t:1
+max_epoch:20
+batch_size:64
+worker:4
+dset:a2d
+choice:shot
+lr:0.001
+seed:2021
+class_num:31
+par:0.1
+bottleneck:256
+layer:wn
+classifier:bn
+smooth:0.1
+output:office31_weight
+home:False
+office31:True
+visda:False
+use_c:True
+output_dir:./office31_weight/seed2021/a2d
+out_file:<_io.TextIOWrapper name='./office31_weight/seed2021/a2d/log_src_val.txt' mode='w' encoding='UTF-8'>
+
+Task: a2d, Iter:1/20; Accuracy = 90.10%
+Task: a2d, Iter:2/20; Accuracy = 95.46%
+Task: a2d, Iter:3/20; Accuracy = 97.76%
+Task: a2d, Iter:4/20; Accuracy = 99.11%
+Task: a2d, Iter:5/20; Accuracy = 99.68%
+Task: a2d, Iter:6/20; Accuracy = 99.82%
+Task: a2d, Iter:7/20; Accuracy = 99.96%
+Task: a2d, Iter:8/20; Accuracy = 99.96%
+Task: a2d, Iter:9/20; Accuracy = 99.96%
+Task: a2d, Iter:10/20; Accuracy = 100.00%
+Task: a2d, Iter:11/20; Accuracy = 100.00%
+Task: a2d, Iter:12/20; Accuracy = 100.00%
+Task: a2d, Iter:13/20; Accuracy = 100.00%
+Task: a2d, Iter:14/20; Accuracy = 100.00%
+Task: a2d, Iter:15/20; Accuracy = 100.00%
+Task: a2d, Iter:16/20; Accuracy = 100.00%
+Task: a2d, Iter:17/20; Accuracy = 100.00%
+Task: a2d, Iter:18/20; Accuracy = 100.00%
+Task: a2d, Iter:19/20; Accuracy = 100.00%
+Task: a2d, Iter:20/20; Accuracy = 100.00%
+Task: a2d, Accuracy = 80.92%

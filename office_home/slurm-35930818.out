@@ -1,0 +1,20 @@
+/home/lg154/.local/lib/python3.7/site-packages/torch/utils/data/dataloader.py:481: UserWarning: This DataLoader will create 4 worker processes in total. Our suggested max number of worker in current system is 2, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  cpuset_checked))
+Task: p2c, Iter:1/20; Accuracy = 93.92%
+Task: p2c, Iter:2/20; Accuracy = 98.04%
+Task: p2c, Iter:3/20; Accuracy = 99.19%
+Task: p2c, Iter:4/20; Accuracy = 99.39%
+Task: p2c, Iter:5/20; Accuracy = 99.55%
+Task: p2c, Iter:6/20; Accuracy = 99.59%
+Task: p2c, Iter:7/20; Accuracy = 99.64%
+Task: p2c, Iter:8/20; Accuracy = 99.71%
+Task: p2c, Iter:9/20; Accuracy = 99.75%
+Task: p2c, Iter:10/20; Accuracy = 99.77%
+Task: p2c, Iter:11/20; Accuracy = 99.77%
+Task: p2c, Iter:12/20; Accuracy = 99.62%
+Task: p2c, Iter:13/20; Accuracy = 99.75%
+Task: p2c, Iter:14/20; Accuracy = 99.73%
+Task: p2c, Iter:15/20; Accuracy = 99.80%
+Task: p2c, Iter:16/20; Accuracy = 99.77%
+Task: p2c, Iter:17/20; Accuracy = 99.77%
+Task: p2c, Iter:18/20; Accuracy = 99.71%
